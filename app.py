@@ -5,7 +5,7 @@ import os
 import re
 
 app = Flask(__name__)
-app.secret_key = os.urandom(24)
+app.secret_key = os.environ.get('SECRET_KEY', os.urandom(24))
 
 DATABASE = "expense_tracker.db"
 
@@ -228,6 +228,17 @@ def edit_expense(expense_id):
         return redirect(url_for('tracker'))
 
     return render_template('edit_expense.html', expense=expense)
+
+def init_db():
+    with app.app_context():
+        if not os.path.exists(DATABASE):
+            with app.open_resource('init_db.py', mode='r') as f:
+                conn = sqlite3.connect(DATABASE)
+                conn.executescript(f.read())
+                conn.close()
+
+# Initialize the database when the app starts
+init_db()
 
 if __name__ == '__main__':
     app.run(debug=True)
