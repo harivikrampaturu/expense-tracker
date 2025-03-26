@@ -1,5 +1,18 @@
 DROP TABLE IF EXISTS users;
 CREATE TABLE users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    ...
+    username TEXT NOT NULL UNIQUE,
+    email TEXT NOT NULL UNIQUE,
+    password TEXT NOT NULL
+);
+
+DROP TABLE IF EXISTS expenses;
+CREATE TABLE expenses (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    date TEXT NOT NULL,
+    category TEXT NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users (id)
 ); 
