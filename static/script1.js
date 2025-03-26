@@ -135,4 +135,34 @@ document.addEventListener('DOMContentLoaded', function() {
         const today = new Date().toISOString().split('T')[0];
         dateInput.value = today;
     }
+
+    // Handle delete buttons
+    document.querySelectorAll('.btn-delete').forEach(button => {
+        button.addEventListener('click', function() {
+            if (confirm('Are you sure you want to delete this expense?')) {
+                const expenseId = this.dataset.id;
+                fetch(`/delete_expense/${expenseId}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message) {
+                        // Remove the row from the table
+                        this.closest('tr').remove();
+                        // Optionally refresh the page to update totals
+                        window.location.reload();
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }
+        });
+    });
+
+    // Handle edit buttons
+    document.querySelectorAll('.btn-edit').forEach(button => {
+        button.addEventListener('click', function() {
+            const expenseId = this.dataset.id;
+            window.location.href = `/edit_expense/${expenseId}`;
+        });
+    });
 });
