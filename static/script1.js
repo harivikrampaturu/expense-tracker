@@ -165,4 +165,46 @@ document.addEventListener('DOMContentLoaded', function() {
             window.location.href = `/edit_expense/${expenseId}`;
         });
     });
+
+    const passwordInput = document.getElementById('password');
+    if (passwordInput) {
+        const requirements = {
+            length: document.getElementById('length'),
+            uppercase: document.getElementById('uppercase'),
+            lowercase: document.getElementById('lowercase'),
+            number: document.getElementById('number')
+        };
+
+        passwordInput.addEventListener('input', function() {
+            const password = this.value;
+            
+            // Check length
+            if (password.length >= 8) {
+                requirements.length.classList.add('valid');
+            } else {
+                requirements.length.classList.remove('valid');
+            }
+
+            // Check uppercase
+            if (/[A-Z]/.test(password)) {
+                requirements.uppercase.classList.add('valid');
+            } else {
+                requirements.uppercase.classList.remove('valid');
+            }
+
+            // Check lowercase
+            if (/[a-z]/.test(password)) {
+                requirements.lowercase.classList.add('valid');
+            } else {
+                requirements.lowercase.classList.remove('valid');
+            }
+
+            // Check number
+            if (/[0-9]/.test(password)) {
+                requirements.number.classList.add('valid');
+            } else {
+                requirements.number.classList.remove('valid');
+            }
+        });
+    }
 });

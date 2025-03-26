@@ -65,12 +65,12 @@ button:hover {
 }
 
 .alert {
-    padding: 0.5rem;
-    margin-bottom: 1rem;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 4px;
     background-color: #f8d7da;
     color: #721c24;
     border: 1px solid #f5c6cb;
-    border-radius: 4px;
 }
 
 a {
@@ -227,4 +227,33 @@ select {
 
 .auth-container input {
     margin-bottom: 15px;
+}
+
+.password-requirements {
+    margin: 10px 0;
+    font-size: 0.9em;
+    color: #666;
+}
+
+.password-requirements ul {
+    list-style: none;
+    padding-left: 20px;
+    margin: 5px 0;
+}
+
+.password-requirements li {
+    position: relative;
+    padding-left: 20px;
+}
+
+.password-requirements li::before {
+    content: "✗";
+    color: #ff4444;
+    position: absolute;
+    left: 0;
+}
+
+.password-requirements li.valid::before {
+    content: "✓";
+    color: #4CAF50;
 }

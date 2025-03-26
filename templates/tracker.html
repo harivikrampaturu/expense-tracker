@@ -85,7 +85,7 @@
                     <tr>
                         <td>{{ expense['date'] }}</td>
                         <td>{{ expense['name'] }}</td>
-                        <td>${{ "%.2f"|format(expense['amount']) }}</td>
+                        <td>₹{{ "%.2f"|format(expense['amount']) }}</td>
                         <td>{{ expense['category'] }}</td>
                         <td>
                             <button class="btn-edit" data-id="{{ expense['id'] }}">Edit</button>
@@ -98,7 +98,7 @@
         </section>
 
         <section class="total">
-            <h3>Total Expenses: <span id="totalAmount">${{ "%.2f"|format(total_amount) if total_amount else "0.00"
+            <h3>Total Expenses: <span id="totalAmount">₹{{ "%.2f"|format(total_amount) if total_amount else "0.00"
                     }}</span></h3>
         </section>
     </section>
