@@ -1,0 +1,27 @@
+# Virtual Environment
+venv/
+env/
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Database
+expense_tracker.db
+*.db
+*.sqlite
+*.sqlite3
+
+# Environment variables
+.env
+
+# IDE specific files
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Log files
+*.log

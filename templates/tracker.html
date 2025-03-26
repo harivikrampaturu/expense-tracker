@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Roboto:wght@300;400&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <header>
+        <div class="logo">Expense Tracker</div>
+        <div class="user-info">
+            Welcome, {{ session['username'] }}!
+            <a href="{{ url_for('logout') }}" class="btn" id="logoutBtn">Logout</a>
+        </div>
+    </header>
+
+    <!-- Expense Tracker Section -->
+    <section class="container">
+        <header>
+            <h1>Expense Tracker</h1>
+            <p>Manage your expenses below:</p>
+        </header>
+
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <section class="expense-form">
+            <h2>Add an Expense</h2>
+            <form id="expenseForm" method="POST" action="{{ url_for('tracker') }}">
+                <div class="form-group">
+                    <label for="name">Expense Name:</label>
+                    <input type="text" id="name" name="name" placeholder="Enter expense name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="date">Date:</label>
+                    <input type="date" id="date" name="date" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="amount">Amount:</label>
+                    <input type="number" id="amount" name="amount" placeholder="Enter amount" required min="0.01"
+                        step="0.01">
+                </div>
+
+                <div class="form-group">
+                    <label for="category">Category:</label>
+                    <select id="category" name="category">
+                        <option value="Food">Food</option>
+                        <option value="Transport">Transport</option>
+                        <option value="Utilities">Utilities</option>
+                        <option value="Entertainment">Entertainment</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <button type="submit">Add Expense</button>
+            </form>
+        </section>
+
+        <section class="expense-list">
+            <h2>Expense List</h2>
+            <table id="expenseTable">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Expense Name</th>
+                        <th>Amount</th>
+                        <th>Category</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for expense in expenses %}
+                    <tr>
+                        <td>{{ expense['date'] }}</td>
+                        <td>{{ expense['name'] }}</td>
+                        <td>${{ "%.2f"|format(expense['amount']) }}</td>
+                        <td>{{ expense['category'] }}</td>
+                        <td>
+                            <button class="btn-edit" data-id="{{ expense['id'] }}">Edit</button>
+                            <button class="btn-delete" data-id="{{ expense['id'] }}">Delete</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+
+        <section class="total">
+            <h3>Total Expenses: <span id="totalAmount">${{ "%.2f"|format(total_amount) if total_amount else "0.00"
+                    }}</span></h3>
+        </section>
+    </section>
+
+    <script src="{{ url_for('static', filename='script1.js') }}"></script>
+</body>
+
+</html>
