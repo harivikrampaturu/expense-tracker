@@ -1,28 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Expense Tracker</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Roboto:wght@300;400&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-
-<body>
-    <header>
-        <div class="logo">Expense Tracker</div>
-        <nav>
-            <a href="{{ url_for('login') }}" class="btn">Login</a>
-            <a href="{{ url_for('signup') }}" class="btn">Sign Up</a>
-        </nav>
-    </header>
-    <main>
-        <h1>Welcome to Expense Tracker</h1>
-        <p>Track your expenses easily and efficiently</p>
-    </main>
-</body>
-
-</html>
+{% block content %}
+<div class="text-center py-5">
+    <h1>Welcome to Expense Tracker</h1>
+    <p class="lead">Track your expenses easily and efficiently</p>
+</div>
+{% endblock %}

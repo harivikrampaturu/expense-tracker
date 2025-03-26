@@ -70,7 +70,7 @@ def signup():
             cursor.execute('INSERT INTO users (username, email, password) VALUES (?, ?, ?)',
                          (username, email, hashed_password))
             conn.commit()
-            flash('Registration successful! Please login.')
+            flash('Registration successful! Please login.', 'success')
             return redirect(url_for('login'))
 
         except sqlite3.Error as e:
@@ -136,7 +136,7 @@ def tracker():
                 VALUES (?, ?, ?, ?, ?)
             ''', (user_id, name, date, category, amount))
             conn.commit()
-            flash('Expense added successfully!')
+            flash('Expense added successfully!', 'success')
         except sqlite3.Error as e:
             flash('Error adding expense. Please try again.')
 
@@ -165,7 +165,7 @@ def tracker():
 @app.route('/logout')
 def logout():
     session.clear()
-    flash('You have been logged out')
+    flash('You have been logged out', 'success')
     return redirect(url_for('login'))
 
 @app.route('/delete_expense/<int:expense_id>', methods=['DELETE'])
@@ -210,7 +210,7 @@ def edit_expense(expense_id):
                 WHERE id = ? AND user_id = ?
             ''', (name, date, category, amount, expense_id, session['user_id']))
             conn.commit()
-            flash('Expense updated successfully!')
+            flash('Expense updated successfully!', 'success')
             return redirect(url_for('tracker'))
         except sqlite3.Error as e:
             flash('Error updating expense')
