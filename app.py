@@ -230,12 +230,9 @@ def edit_expense(expense_id):
     return render_template('edit_expense.html', expense=expense)
 
 def init_db():
-    with app.app_context():
-        if not os.path.exists(DATABASE):
-            with app.open_resource('init_db.py', mode='r') as f:
-                conn = sqlite3.connect(DATABASE)
-                conn.executescript(f.read())
-                conn.close()
+    with sqlite3.connect('database.db') as conn:
+        with open('schema.sql', 'r') as f:
+            conn.executescript(f.read())
 
 # Initialize the database when the app starts
 init_db()
