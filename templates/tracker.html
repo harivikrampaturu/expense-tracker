@@ -8,7 +8,11 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Roboto:wght@300;400&display=swap"
         rel="stylesheet">
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.css' rel='stylesheet' />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.js'></script>
 </head>
 
 <body>
@@ -16,93 +20,242 @@
         <div class="logo">Expense Tracker</div>
         <div class="user-info">
             Welcome, {{ session['username'] }}!
-            <a href="{{ url_for('logout') }}" class="btn" id="logoutBtn">Logout</a>
+            <a href="{{ url_for('logout') }}" class="btn btn-outline-light" id="logoutBtn">Logout</a>
         </div>
     </header>
 
-    <!-- Expense Tracker Section -->
-    <section class="container">
-        <header>
-            Manage your expenses below:
-        </header>
-
-        {% with messages = get_flashed_messages() %}
+    <div class="container-fluid py-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-        {% for message in messages %}
-        <div class="alert">{{ message }}</div>
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
         {% endfor %}
         {% endif %}
         {% endwith %}
 
-        <section class="expense-form">
-            <h2>Add an Expense</h2>
-            <form id="expenseForm" method="POST" action="{{ url_for('tracker') }}">
-                <div class="form-group">
-                    <label for="name">Expense Name:</label>
-                    <input type="text" id="name" name="name" placeholder="Enter expense name" required>
+        <div class="row g-4">
+            <!-- Calendar Section -->
+            <div class="col-md-8">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Expense Calendar</h5>
+                        <div id="calendar"></div>
+                    </div>
                 </div>
+            </div>
 
-                <div class="form-group">
-                    <label for="date">Date:</label>
-                    <input type="date" id="date" name="date" required>
+            <!-- Add Expense Form -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Add Expense</h5>
+                        <form id="expenseForm" method="POST" action="{{ url_for('tracker') }}">
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Expense Name:</label>
+                                <input type="text" class="form-control" id="name" name="name" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="date" class="form-label">Date:</label>
+                                <input type="date" class="form-control" id="date" name="date" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="amount" class="form-label">Amount:</label>
+                                <input type="number" class="form-control" id="amount" name="amount" required min="0.01"
+                                    step="0.01">
+                            </div>
+                            <div class="mb-3">
+                                <label for="category" class="form-label">Category:</label>
+                                <select class="form-select" id="category" name="category">
+                                    <option value="Food">Food</option>
+                                    <option value="Transport">Transport</option>
+                                    <option value="Utilities">Utilities</option>
+                                    <option value="Entertainment">Entertainment</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Add Expense</button>
+                        </form>
+                    </div>
                 </div>
+            </div>
 
-                <div class="form-group">
-                    <label for="amount">Amount:</label>
-                    <input type="number" id="amount" name="amount" placeholder="Enter amount" required min="0.01"
-                        step="0.01">
+            <!-- Charts Section -->
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Category Distribution</h5>
+                        <div style="height: 300px;">
+                            <canvas id="categoryChart"></canvas>
+                        </div>
+                    </div>
                 </div>
+            </div>
 
-                <div class="form-group">
-                    <label for="category">Category:</label>
-                    <select id="category" name="category">
-                        <option value="Food">Food</option>
-                        <option value="Transport">Transport</option>
-                        <option value="Utilities">Utilities</option>
-                        <option value="Entertainment">Entertainment</option>
-                        <option value="Other">Other</option>
-                    </select>
+            <!-- Recent Expenses -->
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Recent Expenses</h5>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Name</th>
+                                        <th>Amount</th>
+                                        <th>Category</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for expense in expenses %}
+                                    <tr>
+                                        <td>{{ expense['date'] }}</td>
+                                        <td>{{ expense['name'] }}</td>
+                                        <td>₹{{ "%.2f"|format(expense['amount']) }}</td>
+                                        <td>{{ expense['category'] }}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary btn-edit"
+                                                data-id="{{ expense['id'] }}">Edit</button>
+                                            <button class="btn btn-sm btn-outline-danger btn-delete"
+                                                data-id="{{ expense['id'] }}">Delete</button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mt-3">
+                            <h6 class="fw-bold">Total: ₹{{ "%.2f"|format(total_amount) if total_amount else "0.00" }}
+                            </h6>
+                        </div>
+                    </div>
                 </div>
-                <button type="submit">Add Expense</button>
-            </form>
-        </section>
+            </div>
+        </div>
+    </div>
 
-        <section class="expense-list">
-            <h2>Expense List</h2>
-            <table id="expenseTable">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Expense Name</th>
-                        <th>Amount</th>
-                        <th>Category</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
+    <script>
+        // Function to get color for category
+        function getColorForCategory(category) {
+            const colorMap = {
+                'Food': '#FF6384',
+                'Transport': '#36A2EB',
+                'Utilities': '#FFCE56',
+                'Entertainment': '#4BC0C0',
+                'Other': '#9966FF'
+            };
+            return colorMap[category] || '#808080';
+        }
+
+        // Initialize Calendar
+        document.addEventListener('DOMContentLoaded', function () {
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                height: 450,
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,dayGridWeek'
+                },
+                events: [
                     {% for expense in expenses %}
-                    <tr>
-                        <td>{{ expense['date'] }}</td>
-                        <td>{{ expense['name'] }}</td>
-                        <td>₹{{ "%.2f"|format(expense['amount']) }}</td>
-                        <td>{{ expense['category'] }}</td>
-                        <td>
-                            <button class="btn-edit" data-id="{{ expense['id'] }}">Edit</button>
-                            <button class="btn-delete" data-id="{{ expense['id'] }}">Delete</button>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </section>
+                    {
+                    title: '{{ expense['name'] }} - ₹{{ "%.2f"|format(expense['amount']) }}',
+                    start: '{{ expense['date'] }}',
+                    backgroundColor: getColorForCategory('{{ expense['category'] }}'),
+                    extendedProps: {
+                        amount: '{{ expense['amount'] }}',
+                        category: '{{ expense['category'] }}'
+                        }
+                }{% if not loop.last %}, {% endif %}
+            {% endfor %}
+                ]
+            });
 
-        <section class="total">
-            <h3>Total Expenses: <span id="totalAmount">₹{{ "%.2f"|format(total_amount) if total_amount else "0.00"
-                    }}</span></h3>
-        </section>
-    </section>
+        calendar.render();
+        });
 
+        // Initialize Category Chart
+        const ctx = document.getElementById('categoryChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Food', 'Transport', 'Utilities', 'Entertainment', 'Other'],
+                datasets: [{
+                    data: [
+                        {% for category in ['Food', 'Transport', 'Utilities', 'Entertainment', 'Other'] %}
+                            {{ category_totals.get(category, 0) }}{% if not loop.last %}, {% endif %}
+        {% endfor %}
+                    ],
+        backgroundColor: [
+            '#FF6384',
+            '#36A2EB',
+            '#FFCE56',
+            '#4BC0C0',
+            '#9966FF'
+        ]
+                }]
+            },
+        options: {
+            responsive: true,
+                maintainAspectRatio: true,
+                    plugins: {
+                legend: {
+                    position: 'bottom',
+                        labels: {
+                        boxWidth: 12
+                    }
+                }
+            }
+        }
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ url_for('static', filename='script1.js') }}"></script>
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        header {
+            background-color: #0d6efd;
+            color: white;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            height: 100%;
+        }
+
+        #calendar {
+            min-height: 400px;
+        }
+
+        .fc .fc-toolbar-title {
+            font-size: 1.2em;
+        }
+
+        @media (max-width: 768px) {
+            .row>div {
+                margin-bottom: 1rem;
+            }
+        }
+
+        #categoryChart {
+            max-height: 300px !important;
+        }
+    </style>
 </body>
 
 </html>

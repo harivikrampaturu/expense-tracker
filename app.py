@@ -138,7 +138,7 @@ def tracker():
             conn.commit()
             flash('Expense added successfully!', 'success')
         except sqlite3.Error as e:
-            flash('Error adding expense. Please try again.')
+            flash('Error adding expense. Please try again.', 'danger')
 
     # Fetch expenses for the logged-in user
     cursor.execute('''
@@ -157,10 +157,33 @@ def tracker():
     ''', (session['user_id'],))
     total = cursor.fetchone()['total']
 
+    # Get category totals and convert to dictionary
+    cursor.execute('''
+        SELECT category, SUM(amount) as total
+        FROM expenses 
+        WHERE user_id = ?
+        GROUP BY category
+    ''', (session['user_id'],))
+    category_totals_raw = cursor.fetchall()
+    category_totals = {row['category']: row['total'] for row in category_totals_raw}
+
+    # Get monthly totals
+    cursor.execute('''
+        SELECT strftime('%Y-%m', date) as month, SUM(amount) as total
+        FROM expenses 
+        WHERE user_id = ?
+        GROUP BY month
+        ORDER BY month DESC
+        LIMIT 12
+    ''', (session['user_id'],))
+    monthly_totals = cursor.fetchall()
+
     conn.close()
     return render_template('tracker.html', 
                          expenses=expenses, 
-                         total_amount=total)
+                         total_amount=total,
+                         category_totals=category_totals,
+                         monthly_totals=monthly_totals)
 
 @app.route('/logout')
 def logout():
